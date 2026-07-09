@@ -276,10 +276,10 @@ export default function HomePage() {
             ref={composerRef}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
-            placeholder={`Message ${activeChat.senderName.split(",")[0]}…`}
+            placeholder={`Message ${activeChat.senderName.split(",")[0]}… (Ctrl+Enter to send)`}
             rows={3}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 handleSend();
               }
