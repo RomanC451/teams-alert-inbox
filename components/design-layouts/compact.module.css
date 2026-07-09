@@ -1,0 +1,27 @@
+.shell { min-height: 100dvh; max-width: 560px; margin: 0 auto; padding: 12px 8px; background: var(--bg); color: var(--text); font-family: ui-monospace, monospace; font-size: 0.8rem; }
+.headerRow { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 8px; }
+.homeLink { color: var(--accent); text-decoration: none; font-size: 0.75rem; }
+.title { margin: 4px 0 0; font-size: 1rem; font-weight: 700; font-family: system-ui, sans-serif; }
+.count { padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); }
+.subtitle { margin: 4px 8px 12px; color: var(--muted); font-size: 0.75rem; font-family: system-ui, sans-serif; }
+
+.tableHead, .tableRow { display: grid; grid-template-columns: 80px 1fr 48px 28px; gap: 8px; align-items: center; padding: 6px 8px; }
+.tableHead { color: var(--muted); font-size: 0.65rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.tableRow { border-bottom: 1px solid var(--border); }
+.tableRow:hover { background: var(--hover); }
+.rowBtn { display: contents; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.from { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg { color: var(--preview); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.time { color: var(--muted); font-size: 0.7rem; text-align: right; }
+.del { border: none; background: none; color: var(--del-color); cursor: pointer; font-size: 1rem; }
+
+.chat { display: flex; flex-direction: column; height: 100dvh; max-width: 560px; margin: 0 auto; background: var(--bg); color: var(--text); font-family: ui-monospace, monospace; font-size: 0.8rem; }
+.chatHeader { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.chatHeader button { background: none; border: none; color: inherit; font: inherit; cursor: pointer; }
+.log { flex: 1; overflow-y: auto; padding: 8px; }
+.lineIn, .lineOut { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--border); }
+.lineOut .lineText { color: var(--accent); }
+.lineMeta { color: var(--muted); font-size: 0.7rem; }
+.composer { display: flex; gap: 4px; padding: 8px; border-top: 1px solid var(--border); }
+.composer input { flex: 1; padding: 8px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); font: inherit; }
+.composer button { padding: 8px 12px; background: var(--accent); color: var(--send-color); border: none; cursor: pointer; font: inherit; }

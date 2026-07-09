@@ -1,0 +1,288 @@
+/* Shared layout — uses CSS variables set per theme */
+
+.shell {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.homeLink {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: var(--title-size, 1.5rem);
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.refreshBtn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--btn-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--list-gap, 2px);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--row-radius, 14px);
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: var(--hover);
+}
+
+.rowMain {
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--avatar-size, 48px) 1fr;
+  gap: 12px;
+  min-width: 0;
+  padding: var(--row-pad, 8px 6px 8px 12px);
+  border-radius: 12px;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.avatar {
+  width: var(--avatar-size, 48px);
+  height: var(--avatar-size, 48px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: var(--avatar-font, 0.85rem);
+  background: var(--avatar-bg);
+  color: var(--avatar-color);
+  flex-shrink: 0;
+}
+
+.body {
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top time {
+  color: var(--muted);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.preview {
+  color: var(--preview);
+  font-size: var(--preview-size, 0.9rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delBtn {
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--del-bg);
+  border: 1px solid var(--del-border);
+  color: var(--del-color);
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.chatHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  background: var(--hover);
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.headerName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerSub {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--msg-gap, 8px);
+}
+
+.rowIn {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.rowOut {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bubbleIn,
+.bubbleOut {
+  max-width: 85%;
+  padding: var(--bubble-pad, 10px 14px);
+  border-radius: var(--bubble-radius, 18px);
+  font-size: var(--bubble-font, 1rem);
+}
+
+.bubbleIn {
+  border-bottom-left-radius: 4px;
+  background: var(--incoming);
+  border: 1px solid var(--incoming-border);
+}
+
+.bubbleOut {
+  border-bottom-right-radius: 4px;
+  background: var(--outgoing);
+  border: 1px solid var(--outgoing-border);
+}
+
+.sender {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.bubbleIn p,
+.bubbleOut p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.bubbleIn time,
+.bubbleOut time {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.composer textarea {
+  flex: 1;
+  resize: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: inherit;
+}
+
+.sendBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: var(--send-color, #0b1220);
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}

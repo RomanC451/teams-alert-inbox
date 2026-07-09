@@ -1,0 +1,148 @@
+import type { CSSProperties } from "react";
+
+export type DesignTheme = CSSProperties & Record<`--${string}`, string>;
+
+export const lightTheme: DesignTheme = {
+  "--bg": "#f8fafc",
+  "--bg-elevated": "#ffffff",
+  "--text": "#0f172a",
+  "--muted": "#64748b",
+  "--preview": "#475569",
+  "--accent": "#2563eb",
+  "--border": "#e2e8f0",
+  "--hover": "rgba(15, 23, 42, 0.04)",
+  "--btn-bg": "#ffffff",
+  "--avatar-bg": "linear-gradient(160deg, #3b82f6, #1d4ed8)",
+  "--avatar-color": "#ffffff",
+  "--incoming": "#eff6ff",
+  "--incoming-border": "#bfdbfe",
+  "--outgoing": "#dcfce7",
+  "--outgoing-border": "#bbf7d0",
+  "--input-bg": "#f1f5f9",
+  "--del-bg": "#fef2f2",
+  "--del-border": "#fecaca",
+  "--del-color": "#dc2626",
+  "--send-color": "#ffffff",
+};
+
+export const forestTheme: DesignTheme = {
+  "--bg": "#0f1410",
+  "--bg-elevated": "#161d18",
+  "--text": "#ecfdf5",
+  "--muted": "#86a89a",
+  "--preview": "#a7c4b5",
+  "--accent": "#34d399",
+  "--border": "rgba(52, 211, 153, 0.15)",
+  "--hover": "rgba(52, 211, 153, 0.06)",
+  "--btn-bg": "rgba(52, 211, 153, 0.08)",
+  "--avatar-bg": "linear-gradient(160deg, #34d399, #059669)",
+  "--avatar-color": "#052e16",
+  "--incoming": "rgba(52, 211, 153, 0.12)",
+  "--incoming-border": "rgba(52, 211, 153, 0.28)",
+  "--outgoing": "rgba(16, 185, 129, 0.2)",
+  "--outgoing-border": "rgba(16, 185, 129, 0.35)",
+  "--input-bg": "rgba(0, 0, 0, 0.25)",
+  "--del-bg": "rgba(248, 113, 113, 0.1)",
+  "--del-border": "rgba(248, 113, 113, 0.3)",
+  "--del-color": "#fca5a5",
+  "--send-color": "#052e16",
+};
+
+export const violetTheme: DesignTheme = {
+  "--bg": "#0f0a1a",
+  "--bg-elevated": "#1a1228",
+  "--text": "#f5f3ff",
+  "--muted": "#a78bfa",
+  "--preview": "#c4b5fd",
+  "--accent": "#a78bfa",
+  "--border": "rgba(167, 139, 250, 0.2)",
+  "--hover": "rgba(167, 139, 250, 0.08)",
+  "--btn-bg": "rgba(167, 139, 250, 0.1)",
+  "--avatar-bg": "linear-gradient(160deg, #a78bfa, #7c3aed)",
+  "--avatar-color": "#1e1b4b",
+  "--incoming": "rgba(167, 139, 250, 0.14)",
+  "--incoming-border": "rgba(167, 139, 250, 0.3)",
+  "--outgoing": "rgba(139, 92, 246, 0.22)",
+  "--outgoing-border": "rgba(139, 92, 246, 0.4)",
+  "--input-bg": "rgba(0, 0, 0, 0.25)",
+  "--del-bg": "rgba(248, 113, 113, 0.1)",
+  "--del-border": "rgba(248, 113, 113, 0.3)",
+  "--del-color": "#f87171",
+  "--send-color": "#1e1b4b",
+};
+
+export const compactTheme: DesignTheme = {
+  "--bg": "#0b1220",
+  "--bg-elevated": "#111827",
+  "--text": "#f8fafc",
+  "--muted": "#94a3b8",
+  "--preview": "#94a3b8",
+  "--accent": "#38bdf8",
+  "--border": "rgba(148, 163, 184, 0.2)",
+  "--hover": "rgba(255, 255, 255, 0.04)",
+  "--btn-bg": "rgba(148, 163, 184, 0.12)",
+  "--avatar-bg": "#374151",
+  "--avatar-color": "#f8fafc",
+  "--incoming": "transparent",
+  "--incoming-border": "transparent",
+  "--outgoing": "transparent",
+  "--outgoing-border": "transparent",
+  "--input-bg": "rgba(0, 0, 0, 0.2)",
+  "--del-bg": "transparent",
+  "--del-border": "rgba(248, 113, 113, 0.3)",
+  "--del-color": "#f87171",
+  "--send-color": "#0b1220",
+};
+
+export const spaciousTheme: DesignTheme = {
+  "--bg": "#0b1220",
+  "--bg-elevated": "#111827",
+  "--text": "#f8fafc",
+  "--muted": "#94a3b8",
+  "--preview": "#bae6fd",
+  "--accent": "#38bdf8",
+  "--border": "rgba(148, 163, 184, 0.12)",
+  "--hover": "rgba(255, 255, 255, 0.04)",
+  "--btn-bg": "rgba(148, 163, 184, 0.12)",
+  "--avatar-bg": "linear-gradient(160deg, #38bdf8, #0369a1)",
+  "--avatar-color": "#0b1220",
+  "--incoming": "rgba(56, 189, 248, 0.14)",
+  "--incoming-border": "rgba(56, 189, 248, 0.28)",
+  "--outgoing": "rgba(34, 197, 94, 0.18)",
+  "--outgoing-border": "rgba(34, 197, 94, 0.35)",
+  "--input-bg": "rgba(0, 0, 0, 0.2)",
+  "--del-bg": "rgba(248, 113, 113, 0.1)",
+  "--del-border": "rgba(248, 113, 113, 0.3)",
+  "--del-color": "#f87171",
+  "--send-color": "#0b1220",
+};
+
+export const slateTheme: DesignTheme = {
+  "--bg": "#18181b",
+  "--bg-elevated": "#27272a",
+  "--text": "#fafafa",
+  "--muted": "#a1a1aa",
+  "--preview": "#d4d4d8",
+  "--accent": "#a1a1aa",
+  "--border": "rgba(255, 255, 255, 0.08)",
+  "--hover": "rgba(255, 255, 255, 0.05)",
+  "--btn-bg": "rgba(255, 255, 255, 0.06)",
+  "--avatar-bg": "#3f3f46",
+  "--avatar-color": "#fafafa",
+  "--incoming": "#27272a",
+  "--incoming-border": "#3f3f46",
+  "--outgoing": "#3f3f46",
+  "--outgoing-border": "#52525b",
+  "--input-bg": "#27272a",
+  "--del-bg": "rgba(255, 255, 255, 0.05)",
+  "--del-border": "rgba(255, 255, 255, 0.12)",
+  "--del-color": "#fca5a5",
+  "--send-color": "#18181b",
+};
+
+export function initials(name: string): string {
+  const parts = name.split(/[,\s]+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}

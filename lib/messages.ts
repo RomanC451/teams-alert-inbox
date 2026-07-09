@@ -23,8 +23,39 @@ export function rowToAlert(row: MessageRow): TeamsAlert {
   };
 }
 
+function normalizeMessageBody(body: string): string {
+  return body.trim();
+}
+
+export async function isDuplicateOfLastMessage(
+  cid: string,
+  body: string
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query<{ body: string }>(
+    `SELECT body FROM messages WHERE cid = $1 ORDER BY sent_at DESC LIMIT 1`,
+    [cid]
+  );
+  const last = result.rows[0]?.body;
+  if (last === undefined) return false;
+  return normalizeMessageBody(last) === normalizeMessageBody(body);
+}
+
+async function tombstoneMid(mid: string): Promise<void> {
+  const pool = getPool();
+  await pool.query(
+    `INSERT INTO deleted_mids (mid) VALUES ($1) ON CONFLICT (mid) DO NOTHING`,
+    [mid]
+  );
+}
+
 export async function upsertMessage(alert: TeamsAlert): Promise<void> {
   if (await isMidDeleted(alert.mid)) return;
+
+  if (await isDuplicateOfLastMessage(alert.cid, alert.message)) {
+    await tombstoneMid(alert.mid);
+    return;
+  }
 
   const pool = getPool();
   await pool.query(
@@ -63,6 +94,11 @@ export async function upsertMessages(alerts: TeamsAlert[]): Promise<number> {
 
   for (const alert of alerts) {
     if (deletedMids.has(alert.mid)) continue;
+
+    if (await isDuplicateOfLastMessage(alert.cid, alert.message)) {
+      await tombstoneMid(alert.mid);
+      continue;
+    }
 
     const result = await pool.query(
       `INSERT INTO messages (mid, cid, direction, sender_name, sender_email, body, sent_at)

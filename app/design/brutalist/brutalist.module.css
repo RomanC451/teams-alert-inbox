@@ -1,0 +1,168 @@
+.shell {
+  min-height: 100dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  background: #ffff00;
+  color: #000;
+  font-family: "Courier New", monospace;
+}
+
+.header {
+  padding: 8px;
+  border-bottom: 8px solid #000;
+  background: #ff0000;
+  color: #fff;
+}
+
+.title {
+  margin: 0;
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  font-family: "Impact", "Arial Black", sans-serif;
+  letter-spacing: -2px;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: #000;
+  color: #ffff00;
+  text-decoration: none;
+  font-weight: 700;
+  border: 4px solid #fff;
+}
+
+.warning {
+  margin: 12px;
+  padding: 12px;
+  border: 6px dashed #000;
+  background: #fff;
+  font-weight: 700;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  border: 4px solid #000;
+  border-bottom: none;
+  background: #fff;
+  text-align: left;
+}
+
+.row:last-child {
+  border-bottom: 4px solid #000;
+}
+
+.open {
+  padding: 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.open:hover {
+  background: #00ff00;
+}
+
+.name {
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-decoration: underline wavy #ff0000;
+}
+
+.preview {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+
+.del {
+  padding: 16px;
+  border: none;
+  border-left: 4px solid #000;
+  background: #ff0000;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.chat {
+  min-height: 100dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  background: #e0e0e0;
+  border: 8px solid #000;
+}
+
+.chatHeader {
+  padding: 12px;
+  background: #0000ff;
+  color: #fff;
+  border-bottom: 8px solid #000;
+}
+
+.messages {
+  padding: 12px;
+  min-height: 60dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.in,
+.out {
+  padding: 12px;
+  border: 4px solid #000;
+  max-width: 90%;
+  font-weight: 700;
+}
+
+.in {
+  align-self: flex-start;
+  background: #fff;
+}
+
+.out {
+  align-self: flex-end;
+  background: #00ff00;
+}
+
+.composer {
+  display: flex;
+  border-top: 8px solid #000;
+}
+
+.composer input {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.composer button {
+  padding: 16px 24px;
+  border: none;
+  border-left: 4px solid #000;
+  background: #ff0000;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}

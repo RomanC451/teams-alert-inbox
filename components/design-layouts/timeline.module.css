@@ -1,0 +1,31 @@
+.shell { min-height: 100dvh; max-width: 560px; margin: 0 auto; background: var(--bg); color: var(--text); font-family: Georgia, "Times New Roman", serif; }
+.inboxHeader { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); }
+.homeLink { color: var(--accent); font-size: 0.8rem; text-decoration: none; font-family: system-ui, sans-serif; }
+.title { margin: 12px 0 4px; font-size: 1.5rem; font-weight: 400; font-family: system-ui, sans-serif; }
+.subtitle { margin: 0; color: var(--muted); font-size: 0.85rem; font-family: system-ui, sans-serif; }
+
+.emailList { display: flex; flex-direction: column; }
+.emailRow { width: 100%; padding: 16px 20px; border: none; border-bottom: 1px solid var(--border); background: transparent; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.emailRow:hover { background: var(--hover); }
+.emailTop { display: flex; justify-content: space-between; margin-bottom: 4px; font-family: system-ui, sans-serif; }
+.emailFrom { font-size: 0.9rem; }
+.emailTop time { font-size: 0.75rem; color: var(--muted); }
+.emailSubject { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+.emailSnippet { font-size: 0.8rem; color: var(--muted); font-family: system-ui, sans-serif; }
+
+.chat { min-height: 100dvh; max-width: 560px; margin: 0 auto; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+.chatHeader { padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg-elevated); font-family: system-ui, sans-serif; }
+.chatHeader button { background: none; border: none; color: var(--accent); font: inherit; cursor: pointer; margin-bottom: 12px; }
+.subject { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; font-family: Georgia, serif; }
+.meta { font-size: 0.8rem; color: var(--muted); }
+
+.timeline { flex: 1; overflow-y: auto; padding: 24px 20px 24px 32px; border-left: 2px solid var(--border); margin-left: 20px; }
+.event { position: relative; padding-bottom: 24px; padding-left: 24px; }
+.dot { position: absolute; left: -33px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+.eventBody header { display: flex; justify-content: space-between; margin-bottom: 6px; font-family: system-ui, sans-serif; font-size: 0.8rem; }
+.eventBody time { color: var(--muted); }
+.eventBody p { margin: 0; line-height: 1.6; font-size: 0.95rem; }
+
+.composer { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border); font-family: system-ui, sans-serif; }
+.composer input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font: inherit; }
+.composer button { padding: 10px 20px; border: 1px solid var(--border); background: var(--btn-bg); color: var(--text); cursor: pointer; font: inherit; }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendTeamsReply } from "@/lib/gmail-smtp";
-import { insertOutgoingMessage } from "@/lib/messages";
+import { insertOutgoingMessage, isDuplicateOfLastMessage } from "@/lib/messages";
 import { generateOutgoingMid } from "@/lib/parse-alert";
 
 export const runtime = "nodejs";
@@ -19,6 +19,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = replySchema.parse(await request.json());
+
+    if (await isDuplicateOfLastMessage(body.cid, body.message)) {
+      return NextResponse.json({ ok: true, skipped: true, reason: "duplicate" });
+    }
+
     await sendTeamsReply(body.to, body.cid, body.message);
 
     const alert = await insertOutgoingMessage({

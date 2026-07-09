@@ -1,0 +1,35 @@
+.shell { min-height: 100dvh; max-width: 800px; margin: 0 auto; display: grid; grid-template-columns: 200px 1fr; background: #101012; color: #eeeef0; font-family: "Inter", system-ui, sans-serif; font-size: 0.9rem; }
+.side { padding: 20px 16px; border-right: 1px solid #232329; }
+.logo { display: block; color: #eeeef0; text-decoration: none; font-weight: 600; margin-bottom: 24px; }
+.side nav { display: flex; flex-direction: column; gap: 4px; }
+.side nav span { padding: 6px 10px; border-radius: 6px; color: #8b8b93; cursor: pointer; }
+.navOn { background: #232329; color: #eeeef0 !important; }
+.listPane { padding: 24px; }
+.listHead h1 { margin: 0 0 4px; font-size: 1.25rem; font-weight: 600; }
+.listHead p { margin: 0 0 20px; color: #8b8b93; font-size: 0.8rem; }
+.issue {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start;
+  width: 100%; padding: 12px; margin-bottom: 4px; border-radius: 8px; border: none;
+  background: transparent; color: inherit; text-align: left; cursor: pointer; font: inherit;
+}
+.issue:hover { background: #1a1a1f; }
+.issueId { color: #8b8b93; font-size: 0.75rem; font-family: ui-monospace, monospace; padding-top: 2px; }
+.issueBody { display: flex; flex-direction: column; gap: 4px; }
+.issueBody strong { font-weight: 500; }
+.issueBody span { color: #8b8b93; font-size: 0.75rem; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #5e6ad2; margin-top: 6px; }
+
+.detail { min-height: 100dvh; max-width: 640px; margin: 0 auto; padding: 24px; background: #101012; color: #eeeef0; }
+.detailHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.detailHead button { background: none; border: none; color: #8b8b93; cursor: pointer; font: inherit; }
+.badge { padding: 4px 8px; border-radius: 4px; background: rgba(94,106,210,0.2); color: #9b9ef0; font-size: 0.75rem; }
+.issueTitle { margin: 0 0 8px; font-size: 1.4rem; font-weight: 600; }
+.issueMeta { margin: 0 0 24px; color: #8b8b93; font-size: 0.85rem; }
+.thread { border-top: 1px solid #232329; padding-top: 16px; }
+.comment { padding: 12px 0; border-bottom: 1px solid #232329; }
+.commentHead { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.8rem; }
+.commentHead span { font-weight: 600; }
+.commentHead time { color: #8b8b93; }
+.comment p { margin: 0; line-height: 1.5; color: #c4c4cc; }
+.replyBox { margin-top: 20px; }
+.replyBox input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #232329; background: #1a1a1f; color: #eeeef0; font: inherit; }

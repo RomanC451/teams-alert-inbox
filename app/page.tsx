@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   formatMessageTime,
@@ -22,6 +23,7 @@ export default function HomePage() {
   const [needsAuth, setNeedsAuth] = useState(false);
   const [password, setPassword] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const conversations = useMemo(() => groupAlertsByCid(alerts), [alerts]);
   const activeChat = useMemo(
@@ -58,6 +60,13 @@ export default function HomePage() {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [activeChat, activeChat?.messages.length]);
+
+  useEffect(() => {
+    const el = composerRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [reply, activeId]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -117,8 +126,22 @@ export default function HomePage() {
     deleteConversation(conv.cid, conv.senderName);
   }
 
+  function resetComposer() {
+    setReply("");
+    const el = composerRef.current;
+    if (el) el.style.height = "auto";
+  }
+
   async function handleSend() {
     if (!activeChat || !reply.trim()) return;
+
+    const trimmed = reply.trim();
+    const lastMessage = activeChat.messages[activeChat.messages.length - 1];
+    if (lastMessage && lastMessage.message.trim() === trimmed) {
+      resetComposer();
+      return;
+    }
+
     const target = latestIncomingMessage(activeChat);
     const replyTo = target?.senderEmail || activeChat.senderEmail;
     if (!replyTo) {
@@ -140,14 +163,19 @@ export default function HomePage() {
         body: JSON.stringify({
           to: replyTo,
           cid,
-          message: reply.trim(),
+          message: trimmed,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Send failed");
 
+      if (data.skipped) {
+        resetComposer();
+        return;
+      }
+
       setToast(`Reply sent to ${activeChat.senderName}`);
-      setReply("");
+      resetComposer();
       await loadAlerts();
       setTimeout(() => setToast(null), 3000);
     } catch (e) {
@@ -245,10 +273,11 @@ export default function HomePage() {
 
         <footer className="composer">
           <textarea
+            ref={composerRef}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             placeholder={`Message ${activeChat.senderName.split(",")[0]}…`}
-            rows={1}
+            rows={3}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -278,9 +307,14 @@ export default function HomePage() {
           <h1>Teams Alert Inbox</h1>
           <p className="subtitle">One chat per Teams conversation (CID)</p>
         </div>
-        <button className="btn btn-secondary" onClick={loadAlerts} disabled={loading}>
-          Refresh
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link href="/home" className="btn btn-secondary" style={{ textDecoration: "none" }}>
+            Home
+          </Link>
+          <button className="btn btn-secondary" onClick={loadAlerts} disabled={loading}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {loading && <p className="loading">Loading conversations…</p>}
