@@ -1,6 +1,10 @@
 import { ImapFlow } from "imapflow";
 import { decodeQuotedPrintable } from "./email-encoding";
-import { parseAlertBody, type TeamsAlert } from "./parse-alert";
+import {
+  isIgnorableAlertBody,
+  parseAlertBody,
+  type TeamsAlert,
+} from "./parse-alert";
 function getImapConfig() {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
@@ -42,6 +46,8 @@ export async function fetchTeamsAlerts(limit = 50): Promise<TeamsAlert[]> {
       })) {
         const source = message.source?.toString("utf8") ?? "";
         const body = extractTextBody(source);
+        if (isIgnorableAlertBody(body)) continue;
+
         const from = formatAddress(message.envelope?.from?.[0]);
         const replyTo = formatAddress(message.envelope?.replyTo?.[0]);
         const parsed = parseAlertBody(

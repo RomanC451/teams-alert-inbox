@@ -14,6 +14,12 @@ export type TeamsAlert = {
 
 const QUOTED = /"([^"]+)"/;
 
+export function isIgnorableAlertBody(body: string): boolean {
+  const normalizedBody = decodeQuotedPrintable(body);
+  const fromMatch = normalizedBody.match(/From:\s*"([^"]*)"/i);
+  return fromMatch !== null && fromMatch[1] === "";
+}
+
 export function parseAlertBody(
   body: string,
   fromHeader: string,
@@ -24,16 +30,18 @@ export function parseAlertBody(
   "senderName" | "message" | "senderEmail" | "cid" | "mid" | "receivedAt"
 > {
   const normalizedBody = decodeQuotedPrintable(body);
-  const fromMatch = normalizedBody.match(/From:\s*"([^"]+)"/i);
+  const fromMatch = normalizedBody.match(/From:\s*"([^"]*)"/i);
   const messageMatch = normalizedBody.match(/Message:\s*"([^"]+)"/i);
   const cidMatch = normalizedBody.match(/CID:\s*"([^"]+)"/i);
   const midMatch = normalizedBody.match(/MID:\s*"([^"]+)"/i);
   const timeMatch = normalizedBody.match(/Time:\s*"([^"]+)"/i);
 
   const senderName =
-    fromMatch?.[1] ??
-    fromHeader.match(QUOTED)?.[1] ??
-    (fromHeader.replace(/<[^>]+>/, "").trim() || "Unknown");
+    fromMatch !== null
+      ? fromMatch[1]
+      : (fromHeader.match(QUOTED)?.[1] ??
+        fromHeader.replace(/<[^>]+>/, "").trim() ||
+        "Unknown");
 
   const message = messageMatch?.[1] ?? "";
   const cid = cidMatch?.[1] ?? "";
