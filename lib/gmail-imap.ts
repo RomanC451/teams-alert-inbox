@@ -17,6 +17,32 @@ function getImapConfig() {
   return { user, pass, folder };
 }
 
+type AfterSyncAction = "read" | "delete" | "none";
+
+function getAfterSyncAction(): AfterSyncAction {
+  const value = process.env.GMAIL_IMAP_AFTER_SYNC?.toLowerCase();
+  if (value === "delete") return "delete";
+  if (value === "none") return "none";
+  return "read";
+}
+
+async function applyAfterSyncAction(
+  client: ImapFlow,
+  uids: number[]
+): Promise<void> {
+  if (uids.length === 0) return;
+
+  const action = getAfterSyncAction();
+  if (action === "none") return;
+
+  if (action === "delete") {
+    await client.messageDelete(uids, { uid: true });
+    return;
+  }
+
+  await client.messageFlagsAdd(uids, ["\\Seen"], { uid: true });
+}
+
 export async function fetchTeamsAlerts(limit = 50): Promise<TeamsAlert[]> {
   const { user, pass, folder } = getImapConfig();
   const client = new ImapFlow({
@@ -38,12 +64,15 @@ export async function fetchTeamsAlerts(limit = 50): Promise<TeamsAlert[]> {
 
       const total = mailbox.exists;
       const start = Math.max(1, total - limit + 1);
+      const processedUids: number[] = [];
 
       for await (const message of client.fetch(`${start}:*`, {
         uid: true,
         envelope: true,
         source: true,
       })) {
+        if (message.uid) processedUids.push(message.uid);
+
         const source = message.source?.toString("utf8") ?? "";
         const body = extractTextBody(source);
         if (isIgnorableAlertBody(body)) continue;
@@ -64,6 +93,8 @@ export async function fetchTeamsAlerts(limit = 50): Promise<TeamsAlert[]> {
           direction: "incoming",
         });
       }
+
+      await applyAfterSyncAction(client, processedUids);
     } finally {
       lock.release();
     }
