@@ -40,8 +40,7 @@ export function parseAlertBody(
     fromMatch !== null
       ? fromMatch[1]
       : (fromHeader.match(QUOTED)?.[1] ??
-        fromHeader.replace(/<[^>]+>/, "").trim() ||
-        "Unknown");
+          fromHeader.replace(/<[^>]+>/, "").trim()) || "Unknown";
 
   const message = messageMatch?.[1] ?? "";
   const cid = cidMatch?.[1] ?? "";
