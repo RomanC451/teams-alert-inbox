@@ -8,6 +8,7 @@ export type TeamsAlert = {
   message: string;
   senderEmail: string;
   cid: string;
+  chat: string;
   direction: MessageDirection;
   receivedAt: string;
 };
@@ -27,7 +28,7 @@ export function parseAlertBody(
   fallbackTime?: string
 ): Pick<
   TeamsAlert,
-  "senderName" | "message" | "senderEmail" | "cid" | "mid" | "receivedAt"
+  "senderName" | "message" | "senderEmail" | "cid" | "mid" | "chat" | "receivedAt"
 > {
   const normalizedBody = decodeQuotedPrintable(body);
   const fromMatch = normalizedBody.match(/From:\s*"([^"]*)"/i);
@@ -35,6 +36,7 @@ export function parseAlertBody(
   const cidMatch = normalizedBody.match(/CID:\s*"([^"]+)"/i);
   const midMatch = normalizedBody.match(/MID:\s*"([^"]+)"/i);
   const timeMatch = normalizedBody.match(/Time:\s*"([^"]+)"/i);
+  const chatMatch = normalizedBody.match(/Chat:\s*"([^"]*)"/i);
 
   const senderName =
     fromMatch !== null
@@ -45,13 +47,14 @@ export function parseAlertBody(
   const message = messageMatch?.[1] ?? "";
   const cid = cidMatch?.[1] ?? "";
   const mid = midMatch?.[1] ?? "";
+  const chat = chatMatch?.[1]?.trim() ?? "";
   const receivedAt = parseMessageTime(timeMatch?.[1], fallbackTime);
 
   const emailFromReplyTo = extractEmail(replyToHeader ?? "");
   const emailFromFrom = extractEmail(fromHeader);
   const senderEmail = emailFromReplyTo || emailFromFrom || "";
 
-  return { senderName, message, senderEmail, cid, mid, receivedAt };
+  return { senderName, message, senderEmail, cid, mid, chat, receivedAt };
 }
 
 export function parseMessageTime(

@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
       cid: body.cid,
       senderName: "You",
       senderEmail: process.env.GMAIL_USER ?? "",
+      chat: "",
       message: body.message,
       receivedAt: new Date().toISOString(),
     });

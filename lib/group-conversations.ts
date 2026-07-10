@@ -4,6 +4,8 @@ export type Conversation = {
   id: string;
   cid: string;
   senderName: string;
+  displayName: string;
+  chatName: string;
   senderEmail: string;
   messages: TeamsAlert[];
   lastMessageAt: string;
@@ -16,10 +18,46 @@ export function conversationKey(alert: TeamsAlert): string {
   return `no-cid-${alert.mid}`;
 }
 
+export function isNotificationAlert(alert: TeamsAlert): boolean {
+  return (
+    alert.direction === "incoming" &&
+    !alert.message.trim() &&
+    alert.senderName.trim() !== ""
+  );
+}
+
+export type AlertNotification = {
+  mid: string;
+  cid: string;
+  senderName: string;
+  senderEmail: string;
+  chat: string;
+  receivedAt: string;
+};
+
+export function collectNotifications(alerts: TeamsAlert[]): AlertNotification[] {
+  return alerts
+    .filter(isNotificationAlert)
+    .map((alert) => ({
+      mid: alert.mid,
+      cid: alert.cid,
+      senderName: alert.senderName.trim(),
+      senderEmail: alert.senderEmail,
+      chat: alert.chat.trim(),
+      receivedAt: alert.receivedAt,
+    }))
+    .sort(
+      (a, b) =>
+        new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()
+    );
+}
+
 export function groupAlertsByCid(alerts: TeamsAlert[]): Conversation[] {
   const map = new Map<string, Conversation>();
 
   for (const alert of alerts) {
+    if (isNotificationAlert(alert)) continue;
+
     const key = conversationKey(alert);
     const existing = map.get(key);
 
@@ -27,7 +65,9 @@ export function groupAlertsByCid(alerts: TeamsAlert[]): Conversation[] {
       existing.messages.push(alert);
       if (alert.receivedAt > existing.lastMessageAt) {
         existing.lastMessageAt = alert.receivedAt;
-        existing.preview = alert.message;
+        if (alert.message.trim()) {
+          existing.preview = alert.message;
+        }
       }
       if (alert.direction === "incoming") {
         if (alert.senderName.trim()) {
@@ -43,6 +83,9 @@ export function groupAlertsByCid(alerts: TeamsAlert[]): Conversation[] {
         cid: alert.cid,
         senderName:
           alert.direction === "incoming" ? alert.senderName : "Unknown",
+        displayName:
+          alert.direction === "incoming" ? alert.senderName : "Unknown",
+        chatName: alert.chat,
         senderEmail:
           alert.direction === "incoming" ? alert.senderEmail : "",
         messages: [alert],
@@ -58,12 +101,24 @@ export function groupAlertsByCid(alerts: TeamsAlert[]): Conversation[] {
         new Date(a.receivedAt).getTime() - new Date(b.receivedAt).getTime()
     );
     conv.senderName = conversationTitle(conv);
+    conv.chatName = findChatName(conv);
+    conv.displayName = conv.chatName || conv.senderName;
   }
 
   return [...map.values()].sort(
     (a, b) =>
       new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
   );
+}
+
+function findChatName(conversation: Conversation): string {
+  for (let i = conversation.messages.length - 1; i >= 0; i--) {
+    const message = conversation.messages[i];
+    if (message.direction !== "incoming") continue;
+    const chat = message.chat.trim();
+    if (chat) return chat;
+  }
+  return "";
 }
 
 function conversationTitle(conversation: Conversation): string {

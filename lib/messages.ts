@@ -7,6 +7,7 @@ type MessageRow = {
   direction: "incoming" | "outgoing";
   sender_name: string;
   sender_email: string;
+  chat: string;
   body: string;
   sent_at: Date;
 };
@@ -18,6 +19,7 @@ export function rowToAlert(row: MessageRow): TeamsAlert {
     direction: row.direction,
     senderName: row.sender_name,
     senderEmail: row.sender_email,
+    chat: row.chat,
     message: row.body,
     receivedAt: row.sent_at.toISOString(),
   };
@@ -59,12 +61,13 @@ export async function upsertMessage(alert: TeamsAlert): Promise<void> {
 
   const pool = getPool();
   await pool.query(
-    `INSERT INTO messages (mid, cid, direction, sender_name, sender_email, body, sent_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `INSERT INTO messages (mid, cid, direction, sender_name, sender_email, chat, body, sent_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT (mid) DO UPDATE SET
        cid = EXCLUDED.cid,
        sender_name = EXCLUDED.sender_name,
        sender_email = EXCLUDED.sender_email,
+       chat = EXCLUDED.chat,
        body = EXCLUDED.body,
        sent_at = EXCLUDED.sent_at`,
     [
@@ -73,6 +76,7 @@ export async function upsertMessage(alert: TeamsAlert): Promise<void> {
       alert.direction,
       alert.senderName,
       alert.senderEmail,
+      alert.chat,
       alert.message,
       alert.receivedAt,
     ]
@@ -101,12 +105,13 @@ export async function upsertMessages(alerts: TeamsAlert[]): Promise<number> {
     }
 
     const result = await pool.query(
-      `INSERT INTO messages (mid, cid, direction, sender_name, sender_email, body, sent_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO messages (mid, cid, direction, sender_name, sender_email, chat, body, sent_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (mid) DO UPDATE SET
          cid = EXCLUDED.cid,
          sender_name = EXCLUDED.sender_name,
          sender_email = EXCLUDED.sender_email,
+         chat = EXCLUDED.chat,
          body = EXCLUDED.body,
          sent_at = EXCLUDED.sent_at`,
       [
@@ -115,6 +120,7 @@ export async function upsertMessages(alerts: TeamsAlert[]): Promise<number> {
         alert.direction,
         alert.senderName,
         alert.senderEmail,
+        alert.chat,
         alert.message,
         alert.receivedAt,
       ]
@@ -128,7 +134,7 @@ export async function upsertMessages(alerts: TeamsAlert[]): Promise<number> {
 export async function listMessages(limit = 500): Promise<TeamsAlert[]> {
   const pool = getPool();
   const result = await pool.query<MessageRow>(
-    `SELECT mid, cid, direction, sender_name, sender_email, body, sent_at
+    `SELECT mid, cid, direction, sender_name, sender_email, chat, body, sent_at
      FROM messages
      ORDER BY sent_at ASC
      LIMIT $1`,

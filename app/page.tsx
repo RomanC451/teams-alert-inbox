@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  collectNotifications,
   formatMessageTime,
   groupAlertsByCid,
   initials,
@@ -26,6 +27,7 @@ export default function HomePage() {
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const conversations = useMemo(() => groupAlertsByCid(alerts), [alerts]);
+  const notifications = useMemo(() => collectNotifications(alerts), [alerts]);
   const activeChat = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? null,
     [conversations, activeId]
@@ -119,11 +121,11 @@ export default function HomePage() {
 
   function handleDeleteChat() {
     if (!activeChat?.cid) return;
-    deleteConversation(activeChat.cid, activeChat.senderName);
+    deleteConversation(activeChat.cid, activeChat.displayName);
   }
 
   function handleDeleteFromList(conv: Conversation) {
-    deleteConversation(conv.cid, conv.senderName);
+    deleteConversation(conv.cid, conv.displayName);
   }
 
   function resetComposer() {
@@ -174,7 +176,9 @@ export default function HomePage() {
         return;
       }
 
-      setToast(`Reply sent to ${activeChat.senderName}`);
+      setToast(
+        `Reply sent to ${latestIncomingMessage(activeChat)?.senderName ?? activeChat.displayName}`
+      );
       resetComposer();
       await loadAlerts();
       setTimeout(() => setToast(null), 3000);
@@ -223,11 +227,13 @@ export default function HomePage() {
           >
             ←
           </button>
-          <div className="avatar">{initials(activeChat.senderName)}</div>
+          <div className="avatar">{initials(activeChat.displayName)}</div>
           <div className="chat-header-text">
-            <div className="chat-header-name">{activeChat.senderName}</div>
+            <div className="chat-header-name">{activeChat.displayName}</div>
             <div className="chat-header-sub">
-              {activeChat.senderEmail || "No email on file"}
+              {activeChat.chatName
+                ? activeChat.senderName
+                : activeChat.senderEmail || "No email on file"}
             </div>
           </div>
           <button
@@ -276,7 +282,7 @@ export default function HomePage() {
             ref={composerRef}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
-            placeholder={`Message ${activeChat.senderName.split(",")[0]}… (Ctrl+Enter to send)`}
+            placeholder={`Message ${(latestIncomingMessage(activeChat)?.senderName ?? activeChat.senderName).split(",")[0]}… (Ctrl+Enter to send)`}
             rows={3}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -319,11 +325,58 @@ export default function HomePage() {
 
       {loading && <p className="loading">Loading conversations…</p>}
       {error && <p className="error">{error}</p>}
-      {!loading && conversations.length === 0 && (
-        <p className="empty">No alerts in [TEAMS-ALERT]</p>
+      {!loading &&
+        conversations.length === 0 &&
+        notifications.length === 0 && (
+          <p className="empty">No alerts in [TEAMS-ALERT]</p>
+        )}
+
+      {!loading && notifications.length > 0 && (
+        <section className="notifications-section">
+          <h2 className="section-title">Notifications</h2>
+          <div className="notification-list">
+            {notifications.map((notification) => {
+              const linkedChat = conversations.find(
+                (conv) => conv.cid === notification.cid
+              );
+              const label = notification.senderName;
+              const subtitle = notification.chat || "Ping with no message";
+
+              return (
+                <div key={notification.mid} className="notification-row">
+                  <button
+                    type="button"
+                    className="notification-main"
+                    disabled={!linkedChat}
+                    onClick={() => {
+                      if (!linkedChat) return;
+                      setActiveId(linkedChat.id);
+                      setReply("");
+                      setError(null);
+                    }}
+                  >
+                    <div className="avatar notification-avatar">
+                      {initials(label)}
+                    </div>
+                    <div className="notification-body">
+                      <div className="notification-top">
+                        <span className="notification-name">{label}</span>
+                        <time>{formatMessageTime(notification.receivedAt)}</time>
+                      </div>
+                      <div className="notification-sub">{subtitle}</div>
+                    </div>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
-      <div className="conversation-list">
+      {!loading && conversations.length > 0 && (
+        <section className="conversations-section">
+          <h2 className="section-title">Chats</h2>
+          <div className="conversation-list">
         {conversations.map((conv) => (
           <div key={conv.id} className="conversation-row">
             <button
@@ -335,10 +388,10 @@ export default function HomePage() {
                 setError(null);
               }}
             >
-              <div className="avatar">{initials(conv.senderName)}</div>
+              <div className="avatar">{initials(conv.displayName)}</div>
               <div className="conversation-body">
                 <div className="conversation-top">
-                  <span className="conversation-name">{conv.senderName}</span>
+                  <span className="conversation-name">{conv.displayName}</span>
                   <time>{formatMessageTime(conv.lastMessageAt)}</time>
                 </div>
                 <div className="conversation-preview">
@@ -356,14 +409,16 @@ export default function HomePage() {
               className="btn btn-secondary btn-icon btn-danger-icon btn-danger-compact conversation-delete"
               onClick={() => handleDeleteFromList(conv)}
               disabled={deletingCid === conv.cid || loading}
-              aria-label={`Delete chat with ${conv.senderName}`}
+              aria-label={`Delete chat with ${conv.displayName}`}
               title="Delete chat"
             >
               {deletingCid === conv.cid ? "…" : "Del"}
             </button>
           </div>
         ))}
-      </div>
+          </div>
+        </section>
+      )}
 
       {toast && <div className="toast">{toast}</div>}
     </main>
