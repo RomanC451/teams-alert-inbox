@@ -101,6 +101,8 @@ h1 {
   padding: 8px 6px 8px 12px;
   border-radius: 12px;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
 }
 
 .conversation-main:hover {
@@ -211,11 +213,12 @@ h1 {
   padding: 10px 12px;
   border-radius: 12px;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
 }
 
-.notification-main:disabled {
+.notification-main-static {
   cursor: default;
-  opacity: 1;
 }
 
 .notification-avatar {
@@ -283,6 +286,8 @@ h1 {
   font-size: 1.2rem;
   display: grid;
   place-items: center;
+  text-decoration: none;
+  color: inherit;
 }
 
 .back-btn:hover {

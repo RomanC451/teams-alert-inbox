@@ -1,90 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { LoginForm } from "@/components/login-form";
+import { chatPath } from "@/lib/chat-routes";
 import {
   collectNotifications,
   formatMessageTime,
   groupAlertsByCid,
   initials,
-  latestIncomingMessage,
 } from "@/lib/group-conversations";
 import type { Conversation } from "@/lib/group-conversations";
-import type { TeamsAlert } from "@/lib/parse-alert";
+import { useInbox } from "@/lib/use-inbox";
 
 export default function HomePage() {
-  const [alerts, setAlerts] = useState<TeamsAlert[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [reply, setReply] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
+  const {
+    alerts,
+    loading,
+    error,
+    setError,
+    toast,
+    setToast,
+    needsAuth,
+    password,
+    setPassword,
+    handleLogin,
+    loadAlerts,
+  } = useInbox();
+
   const [deletingCid, setDeletingCid] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const [needsAuth, setNeedsAuth] = useState(false);
-  const [password, setPassword] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const conversations = useMemo(() => groupAlertsByCid(alerts), [alerts]);
   const notifications = useMemo(() => collectNotifications(alerts), [alerts]);
-  const activeChat = useMemo(
-    () => conversations.find((c) => c.id === activeId) ?? null,
-    [conversations, activeId]
-  );
-
-  const loadAlerts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/alerts", { cache: "no-store" });
-      if (res.status === 401) {
-        setNeedsAuth(true);
-        return;
-      }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to load");
-      setAlerts(data.alerts);
-      setNeedsAuth(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load alerts");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadAlerts();
-  }, [loadAlerts]);
-
-  useEffect(() => {
-    if (activeChat) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [activeChat, activeChat?.messages.length]);
-
-  useEffect(() => {
-    const el = composerRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-  }, [reply, activeId]);
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    if (!res.ok) {
-      setError("Wrong password");
-      return;
-    }
-    setNeedsAuth(false);
-    setError(null);
-    loadAlerts();
-  }
 
   async function deleteConversation(cid: string, senderName: string) {
     if (!cid) return;
@@ -105,10 +52,6 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Delete failed");
 
-      if (activeId === cid) {
-        setActiveId(null);
-        setReply("");
-      }
       setToast("Chat deleted");
       await loadAlerts();
       setTimeout(() => setToast(null), 3000);
@@ -119,190 +62,18 @@ export default function HomePage() {
     }
   }
 
-  function handleDeleteChat() {
-    if (!activeChat?.cid) return;
-    deleteConversation(activeChat.cid, activeChat.displayName);
-  }
-
   function handleDeleteFromList(conv: Conversation) {
     deleteConversation(conv.cid, conv.displayName);
   }
 
-  function resetComposer() {
-    setReply("");
-    const el = composerRef.current;
-    if (el) el.style.height = "auto";
-  }
-
-  async function handleSend() {
-    if (!activeChat || !reply.trim()) return;
-
-    const trimmed = reply.trim();
-    const lastMessage = activeChat.messages[activeChat.messages.length - 1];
-    if (lastMessage && lastMessage.message.trim() === trimmed) {
-      resetComposer();
-      return;
-    }
-
-    const target = latestIncomingMessage(activeChat);
-    const replyTo = target?.senderEmail || activeChat.senderEmail;
-    if (!replyTo) {
-      setError("No email address for this sender");
-      return;
-    }
-    const cid = activeChat.cid || target?.cid;
-    if (!cid) {
-      setError("No conversation ID for this thread");
-      return;
-    }
-
-    setSending(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: replyTo,
-          cid,
-          message: trimmed,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-
-      if (data.skipped) {
-        resetComposer();
-        return;
-      }
-
-      setToast(
-        `Reply sent to ${latestIncomingMessage(activeChat)?.senderName ?? activeChat.displayName}`
-      );
-      resetComposer();
-      await loadAlerts();
-      setTimeout(() => setToast(null), 3000);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to send");
-    } finally {
-      setSending(false);
-    }
-  }
-
   if (needsAuth) {
     return (
-      <main className="app-shell">
-        <form className="login" onSubmit={handleLogin}>
-          <h1>Teams Alert Inbox</h1>
-          <p className="subtitle">Enter app password to continue</p>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="App password"
-            autoComplete="current-password"
-          />
-          <button className="btn btn-primary" type="submit" style={{ width: "100%" }}>
-            Unlock
-          </button>
-          {error && <p className="error">{error}</p>}
-        </form>
-      </main>
-    );
-  }
-
-  if (activeChat) {
-    return (
-      <div className="chat-screen">
-        <header className="chat-header">
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => {
-              setActiveId(null);
-              setReply("");
-              setError(null);
-            }}
-            aria-label="Back to conversations"
-          >
-            ←
-          </button>
-          <div className="avatar">{initials(activeChat.displayName)}</div>
-          <div className="chat-header-text">
-            <div className="chat-header-name">{activeChat.displayName}</div>
-            <div className="chat-header-sub">
-              {activeChat.chatName
-                ? activeChat.senderName
-                : activeChat.senderEmail || "No email on file"}
-            </div>
-          </div>
-          <button
-            className="btn btn-secondary btn-icon btn-danger-icon btn-danger-compact"
-            onClick={handleDeleteChat}
-            disabled={deletingCid === activeChat.cid || loading}
-            aria-label="Delete chat"
-            title="Delete chat"
-          >
-            {deletingCid === activeChat.cid ? "…" : "Del"}
-          </button>
-          <button
-            className="btn btn-secondary btn-icon"
-            onClick={loadAlerts}
-            disabled={loading}
-            aria-label="Refresh"
-          >
-            ↻
-          </button>
-        </header>
-
-        <div className="messages">
-          {activeChat.messages.map((msg) => (
-            <div
-              key={msg.mid}
-              className={`message-row ${msg.direction === "outgoing" ? "outgoing" : "incoming"}`}
-            >
-              <div
-                className={`bubble ${msg.direction === "outgoing" ? "outgoing" : "incoming"}`}
-              >
-                {msg.direction === "incoming" && msg.senderName && (
-                  <span className="bubble-sender">{msg.senderName}</span>
-                )}
-                <p>{msg.message}</p>
-                <time>{formatMessageTime(msg.receivedAt)}</time>
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {error && <p className="chat-error">{error}</p>}
-
-        <footer className="composer">
-          <textarea
-            ref={composerRef}
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            placeholder={`Message ${(latestIncomingMessage(activeChat)?.senderName ?? activeChat.senderName).split(",")[0]}… (Ctrl+Enter to send)`}
-            rows={3}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-          />
-          <button
-            className="btn btn-primary send-btn"
-            onClick={handleSend}
-            disabled={sending || !reply.trim()}
-            aria-label="Send reply"
-          >
-            {sending ? "…" : "↑"}
-          </button>
-        </footer>
-
-        {toast && <div className="toast">{toast}</div>}
-      </div>
+      <LoginForm
+        password={password}
+        setPassword={setPassword}
+        onSubmit={handleLogin}
+        error={error}
+      />
     );
   }
 
@@ -342,18 +113,31 @@ export default function HomePage() {
               const label = notification.senderName;
               const subtitle = notification.chat || "Ping with no message";
 
+              if (!linkedChat) {
+                return (
+                  <div key={notification.mid} className="notification-row">
+                    <div className="notification-main notification-main-static">
+                      <div className="avatar notification-avatar">
+                        {initials(label)}
+                      </div>
+                      <div className="notification-body">
+                        <div className="notification-top">
+                          <span className="notification-name">{label}</span>
+                          <time>{formatMessageTime(notification.receivedAt)}</time>
+                        </div>
+                        <div className="notification-sub">{subtitle}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div key={notification.mid} className="notification-row">
-                  <button
-                    type="button"
+                  <Link
+                    href={chatPath(linkedChat.id)}
                     className="notification-main"
-                    disabled={!linkedChat}
-                    onClick={() => {
-                      if (!linkedChat) return;
-                      setActiveId(linkedChat.id);
-                      setReply("");
-                      setError(null);
-                    }}
+                    onClick={() => setError(null)}
                   >
                     <div className="avatar notification-avatar">
                       {initials(label)}
@@ -365,7 +149,7 @@ export default function HomePage() {
                       </div>
                       <div className="notification-sub">{subtitle}</div>
                     </div>
-                  </button>
+                  </Link>
                 </div>
               );
             })}
@@ -377,45 +161,44 @@ export default function HomePage() {
         <section className="conversations-section">
           <h2 className="section-title">Chats</h2>
           <div className="conversation-list">
-        {conversations.map((conv) => (
-          <div key={conv.id} className="conversation-row">
-            <button
-              type="button"
-              className="conversation-main"
-              onClick={() => {
-                setActiveId(conv.id);
-                setReply("");
-                setError(null);
-              }}
-            >
-              <div className="avatar">{initials(conv.displayName)}</div>
-              <div className="conversation-body">
-                <div className="conversation-top">
-                  <span className="conversation-name">{conv.displayName}</span>
-                  <time>{formatMessageTime(conv.lastMessageAt)}</time>
-                </div>
-                <div className="conversation-preview">
-                  {conv.preview || "No message text"}
-                </div>
-                {conv.messages.length > 1 && (
-                  <span className="conversation-count">
-                    {conv.messages.length} messages
-                  </span>
-                )}
+            {conversations.map((conv) => (
+              <div key={conv.id} className="conversation-row">
+                <Link
+                  href={chatPath(conv.id)}
+                  className="conversation-main"
+                  onClick={() => setError(null)}
+                >
+                  <div className="avatar">{initials(conv.displayName)}</div>
+                  <div className="conversation-body">
+                    <div className="conversation-top">
+                      <span className="conversation-name">{conv.displayName}</span>
+                      <time>{formatMessageTime(conv.lastMessageAt)}</time>
+                    </div>
+                    <div className="conversation-preview">
+                      {conv.preview || "No message text"}
+                    </div>
+                    {conv.messages.length > 1 && (
+                      <span className="conversation-count">
+                        {conv.messages.length} messages
+                      </span>
+                    )}
+                  </div>
+                </Link>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-icon btn-danger-icon btn-danger-compact conversation-delete"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteFromList(conv);
+                  }}
+                  disabled={deletingCid === conv.cid || loading}
+                  aria-label={`Delete chat with ${conv.displayName}`}
+                  title="Delete chat"
+                >
+                  {deletingCid === conv.cid ? "…" : "Del"}
+                </button>
               </div>
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-icon btn-danger-icon btn-danger-compact conversation-delete"
-              onClick={() => handleDeleteFromList(conv)}
-              disabled={deletingCid === conv.cid || loading}
-              aria-label={`Delete chat with ${conv.displayName}`}
-              title="Delete chat"
-            >
-              {deletingCid === conv.cid ? "…" : "Del"}
-            </button>
-          </div>
-        ))}
+            ))}
           </div>
         </section>
       )}
