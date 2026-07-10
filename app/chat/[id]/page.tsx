@@ -21,6 +21,8 @@ export default function ChatPage() {
   const {
     alerts,
     loading,
+    refreshing,
+    initialized,
     error,
     setError,
     toast,
@@ -29,7 +31,9 @@ export default function ChatPage() {
     password,
     setPassword,
     handleLogin,
-    loadAlerts,
+    refreshInbox,
+    upsertAlert,
+    removeConversation,
   } = useInbox();
 
   const [reply, setReply] = useState("");
@@ -82,6 +86,7 @@ export default function ChatPage() {
       if (!res.ok) throw new Error(data.error ?? "Delete failed");
 
       setToast("Chat deleted");
+      removeConversation(activeChat.cid);
       router.push("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete chat");
@@ -136,7 +141,9 @@ export default function ChatPage() {
         `Reply sent to ${latestIncomingMessage(activeChat)?.senderName ?? activeChat.displayName}`
       );
       resetComposer();
-      await loadAlerts();
+      if (data.alert) {
+        upsertAlert(data.alert);
+      }
       setTimeout(() => setToast(null), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to send");
@@ -156,7 +163,7 @@ export default function ChatPage() {
     );
   }
 
-  if (loading) {
+  if (!initialized && loading) {
     return (
       <main className="app-shell">
         <p className="loading">Loading chat…</p>
@@ -164,7 +171,7 @@ export default function ChatPage() {
     );
   }
 
-  if (!activeChat) {
+  if (initialized && !activeChat) {
     return (
       <main className="app-shell">
         <p className="empty">Chat not found.</p>
@@ -173,6 +180,10 @@ export default function ChatPage() {
         </Link>
       </main>
     );
+  }
+
+  if (!activeChat) {
+    return null;
   }
 
   return (
@@ -193,7 +204,7 @@ export default function ChatPage() {
         <button
           className="btn btn-secondary btn-icon btn-danger-icon btn-danger-compact"
           onClick={handleDeleteChat}
-          disabled={deleting || loading}
+          disabled={deleting || refreshing}
           aria-label="Delete chat"
           title="Delete chat"
         >
@@ -201,11 +212,11 @@ export default function ChatPage() {
         </button>
         <button
           className="btn btn-secondary btn-icon"
-          onClick={loadAlerts}
-          disabled={loading}
+          onClick={refreshInbox}
+          disabled={refreshing}
           aria-label="Refresh"
         >
-          ↻
+          {refreshing ? "…" : "↻"}
         </button>
       </header>
 

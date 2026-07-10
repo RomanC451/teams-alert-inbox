@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const synced = await syncAlertsFromImap(50);
+    const sync = request.nextUrl.searchParams.get("sync") === "1";
+    const synced = sync ? await syncAlertsFromImap(50) : 0;
     const alerts = await listMessages(500);
     return NextResponse.json({ alerts, synced });
   } catch (error) {

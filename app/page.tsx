@@ -17,6 +17,8 @@ export default function HomePage() {
   const {
     alerts,
     loading,
+    refreshing,
+    initialized,
     error,
     setError,
     toast,
@@ -25,7 +27,8 @@ export default function HomePage() {
     password,
     setPassword,
     handleLogin,
-    loadAlerts,
+    refreshInbox,
+    removeConversation,
   } = useInbox();
 
   const [deletingCid, setDeletingCid] = useState<string | null>(null);
@@ -53,7 +56,7 @@ export default function HomePage() {
       if (!res.ok) throw new Error(data.error ?? "Delete failed");
 
       setToast("Chat deleted");
-      await loadAlerts();
+      removeConversation(cid);
       setTimeout(() => setToast(null), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete chat");
@@ -88,21 +91,26 @@ export default function HomePage() {
           <Link href="/home" className="btn btn-secondary" style={{ textDecoration: "none" }}>
             Home
           </Link>
-          <button className="btn btn-secondary" onClick={loadAlerts} disabled={loading}>
-            Refresh
+          <button
+            className="btn btn-secondary"
+            onClick={refreshInbox}
+            disabled={refreshing}
+          >
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
         </div>
       </div>
 
-      {loading && <p className="loading">Loading conversations…</p>}
+      {!initialized && loading && (
+        <p className="loading">Loading conversations…</p>
+      )}
       {error && <p className="error">{error}</p>}
-      {!loading &&
-        conversations.length === 0 &&
+      {!loading && initialized && conversations.length === 0 &&
         notifications.length === 0 && (
           <p className="empty">No alerts in [TEAMS-ALERT]</p>
         )}
 
-      {!loading && notifications.length > 0 && (
+      {initialized && notifications.length > 0 && (
         <section className="notifications-section">
           <h2 className="section-title">Notifications</h2>
           <div className="notification-list">
@@ -157,7 +165,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {!loading && conversations.length > 0 && (
+      {initialized && conversations.length > 0 && (
         <section className="conversations-section">
           <h2 className="section-title">Chats</h2>
           <div className="conversation-list">
@@ -191,7 +199,7 @@ export default function HomePage() {
                     e.preventDefault();
                     handleDeleteFromList(conv);
                   }}
-                  disabled={deletingCid === conv.cid || loading}
+                  disabled={deletingCid === conv.cid || refreshing}
                   aria-label={`Delete chat with ${conv.displayName}`}
                   title="Delete chat"
                 >
