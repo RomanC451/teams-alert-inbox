@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { LoginForm } from "@/components/login-form";
+import { NotificationsBell } from "@/components/notifications-bell";
+import { ToolbarMenu } from "@/components/toolbar-menu";
 import { chatPath } from "@/lib/chat-routes";
 import {
   collectNotifications,
@@ -87,17 +89,12 @@ export default function HomePage() {
           <h1>Teams Alert Inbox</h1>
           <p className="subtitle">One chat per Teams conversation (CID)</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Link href="/home" className="btn btn-secondary" style={{ textDecoration: "none" }}>
-            Home
-          </Link>
-          <button
-            className="btn btn-secondary"
-            onClick={refreshInbox}
-            disabled={refreshing}
-          >
-            {refreshing ? "Refreshing…" : "Refresh"}
-          </button>
+        <div className="toolbar-actions">
+          <NotificationsBell
+            notifications={notifications}
+            conversations={conversations}
+          />
+          <ToolbarMenu refreshing={refreshing} onRefresh={refreshInbox} />
         </div>
       </div>
 
@@ -105,69 +102,12 @@ export default function HomePage() {
         <p className="loading">Loading conversations…</p>
       )}
       {error && <p className="error">{error}</p>}
-      {!loading && initialized && conversations.length === 0 &&
-        notifications.length === 0 && (
-          <p className="empty">No alerts in [TEAMS-ALERT]</p>
-        )}
-
-      {initialized && notifications.length > 0 && (
-        <section className="notifications-section">
-          <h2 className="section-title">Notifications</h2>
-          <div className="notification-list">
-            {notifications.map((notification) => {
-              const linkedChat = conversations.find(
-                (conv) => conv.cid === notification.cid
-              );
-              const label = notification.senderName;
-              const subtitle = notification.chat || "Ping with no message";
-
-              if (!linkedChat) {
-                return (
-                  <div key={notification.mid} className="notification-row">
-                    <div className="notification-main notification-main-static">
-                      <div className="avatar notification-avatar">
-                        {initials(label)}
-                      </div>
-                      <div className="notification-body">
-                        <div className="notification-top">
-                          <span className="notification-name">{label}</span>
-                          <time>{formatMessageTime(notification.receivedAt)}</time>
-                        </div>
-                        <div className="notification-sub">{subtitle}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div key={notification.mid} className="notification-row">
-                  <Link
-                    href={chatPath(linkedChat.id)}
-                    className="notification-main"
-                    onClick={() => setError(null)}
-                  >
-                    <div className="avatar notification-avatar">
-                      {initials(label)}
-                    </div>
-                    <div className="notification-body">
-                      <div className="notification-top">
-                        <span className="notification-name">{label}</span>
-                        <time>{formatMessageTime(notification.receivedAt)}</time>
-                      </div>
-                      <div className="notification-sub">{subtitle}</div>
-                    </div>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+      {!loading && initialized && conversations.length === 0 && (
+        <p className="empty">No alerts in [TEAMS-ALERT]</p>
       )}
 
       {initialized && conversations.length > 0 && (
         <section className="conversations-section">
-          <h2 className="section-title">Chats</h2>
           <div className="conversation-list">
             {conversations.map((conv) => (
               <div key={conv.id} className="conversation-row">
